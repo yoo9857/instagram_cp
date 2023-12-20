@@ -2,6 +2,7 @@ package com.example.instagram_st
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.util.Log.*
 import android.widget.Button
 import android.widget.EditText
@@ -71,12 +72,18 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // 페이지 이동
-    fun movePage(user:FirebaseUser?) {
+    fun movePage(user: FirebaseUser?) {
         if (user != null) {
-            Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, MainActivity::class.java))
+            try {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            } catch (e: Exception) {
+                Log.e("MovePage", "Error starting MainActivity: ${e.message}")
+            }
         }
     }
+
 
     // 구글 로그인
     private fun signInWithGoogle() {
@@ -113,9 +120,11 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val user = mAuth.currentUser
                     d("TAG", "Signed in with Google: ${user?.displayName}")
+                    movePage(user)
                 } else {
                     e("TAG", "Google sign-in failed", task.exception)
                 }
             }
     }
+
 }
