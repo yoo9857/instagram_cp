@@ -6,6 +6,9 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/my_bottom_nav_text_color</item>
+        <item name="itemIconTint">@color/my_bottom_nav_icon_color</item>
+        <item name="itemTextColor">@color/my_bottom_nav_text_color</item>
     </style>
 
     <style name="ButtonStyle" parent="Widget.AppCompat.Button.Colored">
