@@ -12,7 +12,6 @@ import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
-import com.facebook.FacebookSdk
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -23,7 +22,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import java.util.Arrays
-
 class LoginActivity : AppCompatActivity() {
     private lateinit var et_email: EditText
     private lateinit var et_pwd: EditText
@@ -34,10 +32,12 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var signInLauncher: ActivityResultLauncher<Intent>
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        // Firebase 인증 객체 초기화
+        mAuth = FirebaseAuth.getInstance()
 
         // CallbackManager 초기화
         callbackManager = CallbackManager.Factory.create()
@@ -66,7 +66,6 @@ class LoginActivity : AppCompatActivity() {
             facebookLogin()
         }
 
-
         // ActivityResultLauncher 초기화
         signInLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -82,8 +81,6 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
     }
-
-
 
     // 회원가입 진행
     private fun signAndSignUp(email: String, pwd: String) {
@@ -135,7 +132,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // 페이스북 로그인
-
     private fun facebookLogin() {
         LoginManager.getInstance()
             .logInWithReadPermissions(this, Arrays.asList("public_profile", "email"))
@@ -143,7 +139,7 @@ class LoginActivity : AppCompatActivity() {
         LoginManager.getInstance()
             .registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
                 override fun onSuccess(result: LoginResult?) {
-                    result?.let { handleFacebookAccessToken(it.accessToken) }
+                    result?.accessToken?.let { handleFacebookAccessToken(it) }
                 }
 
                 override fun onCancel() {
@@ -161,6 +157,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             })
     }
+
     // 구글 로그인 파이어베이스
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
