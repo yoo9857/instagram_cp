@@ -1,10 +1,6 @@
 package com.example.instagram_st
-
 import android.content.Intent
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -16,18 +12,17 @@ import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
+import com.facebook.FacebookSdk
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FacebookAuthProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
-import java.util.*
+import java.util.Arrays
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var et_email: EditText
@@ -35,17 +30,17 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btn_email: Button
     private lateinit var btn_google: Button
     private lateinit var btn_facebook: Button
-    private var callbackManager: CallbackManager? = null
+    private lateinit var callbackManager: CallbackManager
     private lateinit var mAuth: FirebaseAuth
     private lateinit var signInLauncher: ActivityResultLauncher<Intent>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Firebase 초기화
-        mAuth = FirebaseAuth.getInstance()
-            ?: throw IllegalStateException("Firebase initialization failed.")
+        // CallbackManager 초기화
+        callbackManager = CallbackManager.Factory.create()
 
         et_email = findViewById(R.id.email_edittext)
         et_pwd = findViewById(R.id.password_edittext)
@@ -56,7 +51,7 @@ class LoginActivity : AppCompatActivity() {
             val str_pwd = et_pwd.text.toString()
             try {
                 signAndSignUp(str_email, str_pwd)
-            } catch (e: java.lang.Exception) {
+            } catch (e: Exception) {
                 Toast.makeText(this, "아이디와 비밀번호를 제대로 입력하세요.", Toast.LENGTH_SHORT).show()
             }
         }
@@ -71,8 +66,6 @@ class LoginActivity : AppCompatActivity() {
             facebookLogin()
         }
 
-        // CallbackManager 초기화
-        callbackManager = CallbackManager.Factory.create()
 
         // ActivityResultLauncher 초기화
         signInLauncher =
@@ -90,7 +83,9 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-        // 회원가입 진행
+
+
+    // 회원가입 진행
     private fun signAndSignUp(email: String, pwd: String) {
         mAuth.createUserWithEmailAndPassword(email, pwd)
             .addOnCompleteListener(this) { task ->
@@ -140,6 +135,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // 페이스북 로그인
+
     private fun facebookLogin() {
         LoginManager.getInstance()
             .logInWithReadPermissions(this, Arrays.asList("public_profile", "email"))
@@ -147,7 +143,7 @@ class LoginActivity : AppCompatActivity() {
         LoginManager.getInstance()
             .registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
                 override fun onSuccess(result: LoginResult?) {
-                    handleFacebookAccessToken(result?.accessToken)
+                    result?.let { handleFacebookAccessToken(it.accessToken) }
                 }
 
                 override fun onCancel() {
@@ -156,6 +152,7 @@ class LoginActivity : AppCompatActivity() {
 
                 override fun onError(error: FacebookException?) {
                     // 에러 시 처리
+                    Log.e("TAG", "Facebook 로그인 에러: ${error?.message}")
                     Toast.makeText(
                         this@LoginActivity,
                         "Facebook 로그인 에러: ${error?.message}",
@@ -181,8 +178,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // 페이스북 액세스 토큰을 사용한 Firebase 로그인
-    private fun handleFacebookAccessToken(token: AccessToken?) {
-        val credential = FacebookAuthProvider.getCredential(token?.token!!)
+    private fun handleFacebookAccessToken(token: AccessToken) {
+        val credential = FacebookAuthProvider.getCredential(token.token)
         mAuth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -198,23 +195,5 @@ class LoginActivity : AppCompatActivity() {
                     ).show()
                 }
             }
-    }
-
-    // 페이스북 해시키 출력
-    private fun printHashKey() {
-        try {
-            val info: PackageInfo =
-                packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-            for (signature in info.signatures) {
-                val md: MessageDigest = MessageDigest.getInstance("SHA")
-                md.update(signature.toByteArray())
-                val hashKey: String = String(Base64.encode(md.digest(), 0))
-                Log.i("TAG", "printHashKey() Hash Key: $hashKey")
-            }
-        } catch (e: NoSuchAlgorithmException) {
-            Log.e("TAG", "printHashKey()", e)
-        } catch (e: Exception) {
-            Log.e("TAG", "printHashKey()", e)
-        }
     }
 }
