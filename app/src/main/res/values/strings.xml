@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">instagram_st</string>
     <string name="app_name_id">Howlstagram</string>
-    <string name="facebook_app_id">1234</string>
+    <string name="facebook_app_id">1794066951044689</string>
     <string name="fb_login_protocol_scheme">fb1234</string>
-    <string name="facebook_client_token">56789</string>
+    <string name="facebook_client_token">cdd9e9703055a64e6131d88d2c482f88</string>
     <string name="com.twitter.sdk.android.CONSUMER_KEY">0lY6xdMc8l3Bgkdep8DvfPxe4</string>
     <string name="com.twitter.sdk.android.CONSUMER_SECRET">2Uov8wp8sQWccy1oRRes7Q3VgWfsTE1tokYHblse9TTaF0BW1b</string>
 
